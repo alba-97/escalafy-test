@@ -1,14 +1,52 @@
-export default function Home() {
+import ReportingDashboardClient from "@/components/ReportingDashboardClient";
+import type { ReportingMetric } from "@/interfaces/reporting";
+import { getReporting } from "@/lib/reporting";
+
+function toIsoDate(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(date.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+export default async function Home() {
+  const orgId = 1;
+  const today = new Date();
+  const start = new Date(
+    Date.UTC(
+      today.getUTCFullYear(),
+      today.getUTCMonth(),
+      today.getUTCDate() - 29,
+    ),
+  );
+  const end = new Date(
+    Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
+  );
+
+  const startDate = toIsoDate(start);
+  const endDate = toIsoDate(end);
+
+  const metrics: ReportingMetric[] = [
+    "revenue",
+    "total_spend",
+    "profit",
+    "roas",
+  ];
+
+  const initialData = await getReporting({
+    orgId,
+    startDate,
+    endDate,
+    metrics,
+  });
+
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Reporting Dashboard
-        </h1>
-        <p className="text-muted-foreground">
-          Read INSTRUCTIONS.md to get started.
-        </p>
-      </div>
-    </div>
+    <ReportingDashboardClient
+      initialOrgId={orgId}
+      initialStartDate={startDate}
+      initialEndDate={endDate}
+      initialMetrics={metrics}
+      initialData={initialData}
+    />
   );
 }
